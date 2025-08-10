@@ -31,11 +31,20 @@ app.get('/api/chats', async (req, res) => {
       {
         $group: {
           _id: '$wa_id',
-          name: { $first: '$name' },
+          name: { $first: { $ifNull: ["$name", null] } },
           lastMessage: { $first: '$body' },
           timestamp: { $first: '$createdAt' }, 
           wa_id: { $first: '$wa_id' }
         }
+      },
+      {
+          $group: {
+              _id: '$_id',
+              name: { $max: '$name' }, // Take the first valid name found
+              lastMessage: { $first: '$lastMessage' },
+              timestamp: { $first: '$timestamp' },
+              wa_id: { $first: '$wa_id' }
+          }
       },
       { $sort: { timestamp: -1 } } 
     ]);
